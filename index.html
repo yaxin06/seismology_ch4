@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SeismoCore Chapter 4｜地震、斷層與震源機制互動學習網頁</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Segoe UI", sans-serif; }
+    .glass { background: rgba(15, 23, 42, .76); backdrop-filter: blur(16px); }
+    .card { border: 1px solid rgba(148, 163, 184, .18); background: linear-gradient(180deg, rgba(30,41,59,.82), rgba(15,23,42,.9)); box-shadow: 0 18px 50px rgba(2, 6, 23, .28); }
+    .soft-card { border: 1px solid rgba(148, 163, 184, .14); background: rgba(15, 23, 42, .48); }
+    .eq-grid { background-image: none; background-color: #020617; }
+    .range { accent-color: #38bdf8; }
+    .caption { color: #94a3b8; font-size: .86rem; line-height: 1.65; }
+    .pill { border: 1px solid rgba(125, 211, 252, .24); background: rgba(14, 165, 233, .10); color: #bae6fd; }
+    .nav-link { color: #cbd5e1; }
+    .nav-link:hover { color: white; }
+    details summary::-webkit-details-marker { display: none; }
+    canvas { max-width: 100%; }
+
+    .compare-frame { position: relative; overflow: hidden; border-radius: 1.5rem; background: #f8fafc; border: 1px solid rgba(203,213,225,.8); }
+    .compare-frame img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; }
+    .compare-overlay { position: absolute; inset: 0; width: 100%; overflow: hidden; clip-path: inset(0 50% 0 0); }
+    .compare-overlay::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: rgba(14,165,233,.95); box-shadow: 0 0 18px rgba(56,189,248,.55); }
+    .compare-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: #0ea5e9; transform: translateX(-50%); box-shadow: 0 0 18px rgba(14,165,233,.7); }
+    .source-card { background: linear-gradient(180deg, rgba(15,23,42,.72), rgba(15,23,42,.92)); border: 1px solid rgba(148,163,184,.22); }
+
+    .sim-shell { background: #dde3ea; color: #1f2937; border: 1px solid #cbd5e1; box-shadow: inset 0 1px 0 rgba(255,255,255,.55); }
+    .sim-plot { background: #f7f7f7; border: 1px solid #d4dbe3; }
+    .sim-input { background: #eef2f6; border: 1px solid #94a3b8; color: #111827; }
+    .sim-reset { background: #cfd4da; color: #111827; }
+    .sim-reset:hover { background: #c5cbd2; }
+    .sim-chip { background: #eef2ff; color: #1e3a8a; border: 1px solid #c7d2fe; }
+    .switch {
+      position: relative; display: inline-block; width: 54px; height: 30px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider-switch {
+      position: absolute; cursor: pointer; inset: 0; background: #94a3b8; transition: .2s; border-radius: 999px;
+    }
+    .slider-switch:before {
+      position: absolute; content: ""; height: 22px; width: 22px; left: 4px; top: 4px; background-color: white; transition: .2s; border-radius: 50%;
+    }
+    .switch input:checked + .slider-switch { background: #2563eb; }
+    .switch input:checked + .slider-switch:before { transform: translateX(24px); }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 eq-grid">
+  <header class="relative overflow-hidden border-b border-slate-700/70">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,.22),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(99,102,241,.24),transparent_34%),linear-gradient(135deg,rgba(15,23,42,.98),rgba(2,6,23,.92))]"></div>
+    <nav class="relative z-10 mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-400/15 ring-1 ring-sky-300/30">🌐</div>
+        <div>
+          <p class="text-sm tracking-[.28em] text-sky-200/80">SEISMOCORE EXPLORE</p>
+          <p class="text-xs text-slate-400">Chapter 4 Earthquakes & Focal Mechanisms</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-3 text-sm">
+        <a class="nav-link" href="#ch41">4.1 地震導論</a>
+        <a class="nav-link" href="#ch42">4.2 震源機制</a>
+        <a class="nav-link" href="#fault-geometry">斷層幾何</a>
+        <a class="nav-link" href="#mechanism-3d">3D 解讀沙灘球</a>
+        <a class="nav-link" href="#beachball-section">沙灘球機制</a>
+        <a class="nav-link" href="#event20260501">5/1 宜蘭地震</a>
+        <a class="nav-link" href="#gallery">章節圖片</a>
+      </div>
+    </nav>
+    <section class="relative z-10 mx-auto grid max-w-7xl gap-8 px-5 py-16 md:grid-cols-[1.15fr_.85fr] md:py-24">
+      <div>
+        <span class="pill inline-flex rounded-full px-4 py-2 text-sm">地震學第四章互動式學習網頁</span>
+        <h1 class="mt-6 max-w-4xl text-4xl font-black leading-tight tracking-tight md:text-6xl">
+          從彈性回跳到沙灘球：<br />用互動圖解讀地震破裂
+        </h1>
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+          本頁面整合 4.1「地震導論」與 4.2「震源機制」內容，將斷層幾何、P 波初動、節面、輔助面、P/T 軸與震源機制球放進同一個互動學習流程。你現在可以把「互動式斷層幾何模擬器」與「沙灘球機制」分開操作，更方便上課展示與報告使用。
+        </p>
+        <div class="mt-8 grid gap-3 sm:grid-cols-3">
+          <div class="soft-card rounded-2xl p-4"><p class="text-2xl font-black text-sky-300">01</p><p class="mt-1 text-sm text-slate-300">掌握地震循環與彈性回跳</p></div>
+          <div class="soft-card rounded-2xl p-4"><p class="text-2xl font-black text-indigo-300">02</p><p class="mt-1 text-sm text-slate-300">理解斷層走向、傾角、滑移角</p></div>
+          <div class="soft-card rounded-2xl p-4"><p class="text-2xl font-black text-emerald-300">03</p><p class="mt-1 text-sm text-slate-300">分開操作 3D 幾何與沙灘球</p></div>
+        </div>
+      </div>
+      <div class="card rounded-[2rem] p-5">
+        <div class="rounded-[1.5rem] bg-white p-5 shadow-inner">
+          <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83.png" alt="2026年5月1日宜蘭地震震源機制球" class="mx-auto h-[360px] w-full object-contain" />
+        </div>
+        <p class="caption mt-4 text-center">2026/05/01 宜蘭外海地震震源機制球：以實際案例取代示意圖，讓本頁從概念學習直接連結到臺灣地震資料判讀。</p>
+      </div>
+    </section>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-5 py-12">
+    <section id="ch41" class="grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
+      <div class="card rounded-[2rem] p-6">
+        <p class="text-sm font-bold tracking-[.25em] text-sky-300">4.1 INTRODUCTION</p>
+        <h2 class="mt-3 text-3xl font-black">地震不是地表裂開的副作用，而是斷層突然滑動的結果</h2>
+        <p class="mt-5 leading-8 text-slate-300">
+          地震學研究的是地震波的產生與傳播。第四章的重點從「地震波如何穿越地球」轉向「地震如何產生地震波」。大多數地震發生在斷層上，斷層是地殼中兩側岩體相對移動的面；當斷層長期被摩擦鎖住，板塊運動造成的應變逐漸累積，最後超過岩石承受能力，斷層便突然破裂並釋放能量。
+        </p>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2">
+        <article class="soft-card rounded-3xl p-5">
+          <h3 class="text-xl font-black text-sky-200">彈性回跳理論</h3>
+          <p class="mt-3 leading-7 text-slate-300">斷層間震期被鎖住，兩側岩體持續變形；到達破裂門檻後，斷層快速滑移，原本彎曲的地表線性物體被錯開。這個概念解釋了為何地震與斷層錯動密切相關。</p>
+        </article>
+        <article class="soft-card rounded-3xl p-5">
+          <h3 class="text-xl font-black text-sky-200">地震循環</h3>
+          <p class="mt-3 leading-7 text-slate-300">間震期累積應變，震前可能出現前震或其他前兆，同震期發生快速滑移並輻射地震波，震後則有餘震與震後滑移，使斷層逐漸回到長期行為。</p>
+        </article>
+        <article class="soft-card rounded-3xl p-5 md:col-span-2">
+          <h3 class="text-xl font-black text-sky-200">為什麼這一章重要？</h3>
+          <p class="mt-3 leading-7 text-slate-300">震源機制分析把測站記錄到的地震波轉回震源附近的斷層幾何，是一種反演問題。它能有效描述破裂的運動學，包括斷層方向與滑移方向；但若要理解真正的破裂物理，仍需結合地質、測地、岩石摩擦與區域構造資料。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="ch42" class="mt-12 card rounded-[2rem] p-6 md:p-8">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold tracking-[.25em] text-indigo-300">4.2 FOCAL MECHANISMS</p>
+          <h2 class="mt-3 text-3xl font-black">震源機制：用波形反推斷層怎麼動</h2>
+        </div>
+        <span class="rounded-full bg-indigo-400/10 px-4 py-2 text-sm text-indigo-200 ring-1 ring-indigo-300/25">Strike・Dip・Rake / Slip</span>
+      </div>
+      <div class="mt-8 grid gap-5 lg:grid-cols-4">
+        <div class="soft-card rounded-3xl p-5">
+          <h3 class="font-black text-indigo-200">1. 斷層面</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">以平面近似斷層，走向是斷層面與地表交線相對正北的方位角，傾角是斷層面向地下傾斜的角度。</p>
+        </div>
+        <div class="soft-card rounded-3xl p-5">
+          <h3 class="font-black text-indigo-200">2. 滑移向量</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">滑移角（Slip / Rake）描述上盤相對下盤沿斷層面滑動的方向。不同數值對應走滑、正斷、逆斷或斜滑。</p>
+        </div>
+        <div class="soft-card rounded-3xl p-5">
+          <h3 class="font-black text-indigo-200">3. P 波初動</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">不同方位測站會記錄到壓縮或張裂初動。兩種極性的分界形成兩個節面。</p>
+        </div>
+        <div class="soft-card rounded-3xl p-5">
+          <h3 class="font-black text-indigo-200">4. 沙灘球</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">將焦球下半球投影到平面，黑白象限顯示壓縮與張裂。兩個節面中，一個是真斷層面，另一個是輔助面。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="fault-geometry" class="mt-12">
+      <div class="mb-5 flex items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold tracking-[.25em] text-emerald-300">INTERACTIVE BLOCK A</p>
+          <h2 class="mt-2 text-3xl font-black">互動式斷層幾何模擬器</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-7 text-slate-400">這一塊改成接近你提供的操作介面：上方顯示斷層類型與數值摘要，中間為 3D 視窗，下方集中滑桿、數值框、顯示滑移向量開關與重設按鈕，方便課堂展示。</p>
+      </div>
+
+      <div class="sim-shell rounded-[1.6rem] p-5 md:p-6">
+        <div class="grid gap-3 md:grid-cols-[1.3fr_.7fr_.9fr] md:items-start">
+          <div>
+            <h3 class="text-2xl font-black text-slate-800">斷層幾何與震源機制模擬器</h3>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-600">斷層類型</p>
+            <p id="faultGeomType" class="mt-1 text-xl font-black text-slate-900">逆斷層 (Reverse Fault)</p>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-600">走向 / 傾角 / 滑移</p>
+            <p id="faultGeomSummary" class="mt-1 text-xl font-black text-slate-900">0° / 45° / 90°</p>
+          </div>
+        </div>
+
+        <div class="sim-plot mt-5 overflow-hidden rounded-[1.4rem] p-3 md:p-4">
+          <div id="plot3d" class="h-[420px] w-full md:h-[500px]"></div>
+        </div>
+
+        <div class="mt-5 grid gap-4 lg:grid-cols-4 lg:items-end">
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-slate-700">走向 (Strike) °</label>
+            <div class="flex items-center gap-3">
+              <input id="geomStrike" class="w-full accent-blue-600" type="range" min="0" max="360" value="0" />
+              <input id="geomStrikeNumber" class="sim-input w-16 rounded-2xl px-3 py-2 text-center font-bold" type="number" min="0" max="360" value="0" />
+            </div>
+          </div>
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-slate-700">傾角 (Dip) °</label>
+            <div class="flex items-center gap-3">
+              <input id="geomDip" class="w-full accent-blue-600" type="range" min="0" max="90" value="45" />
+              <input id="geomDipNumber" class="sim-input w-16 rounded-2xl px-3 py-2 text-center font-bold" type="number" min="0" max="90" value="45" />
+            </div>
+          </div>
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-slate-700">滑移角 (Slip) °</label>
+            <div class="flex items-center gap-3">
+              <input id="geomRake" class="w-full accent-blue-600" type="range" min="-180" max="180" value="90" />
+              <input id="geomRakeNumber" class="sim-input w-16 rounded-2xl px-3 py-2 text-center font-bold" type="number" min="-180" max="180" value="90" />
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center justify-start gap-4 lg:justify-end">
+            <div>
+              <p class="mb-2 text-sm font-semibold text-slate-700">顯示滑移向量</p>
+              <label class="switch">
+                <input id="geomShowSlip" type="checkbox" checked />
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+            <button id="geomReset" class="sim-reset rounded-full px-8 py-3 font-bold">重置參數</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="mechanism-3d" class="mt-12">
+      <div class="mb-5 flex items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold tracking-[.25em] text-cyan-300">INTERACTIVE BLOCK A-2</p>
+          <h2 class="mt-2 text-3xl font-black">用立體焦球理解沙灘球如何運作</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-7 text-slate-400">這個區塊會跟上方 3D 斷層幾何模擬器同步。你改變 Strike、Dip、Slip 後，焦球上的斷層面、輔助面、滑移方向與黑白象限會一起更新。</p>
+      </div>
+
+      <div class="grid gap-6 xl:grid-cols-[1.05fr_.95fr]">
+        <div class="card overflow-hidden rounded-[2rem] p-5">
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-xl font-black">3D 焦球、節面與滑移方向</h3>
+              <p class="mt-1 text-sm text-slate-400">可旋轉、縮放：看清楚 Strike、Dip、Slip 如何變成沙灘球。</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="rounded-full bg-emerald-400/10 px-3 py-1 text-emerald-200 ring-1 ring-emerald-300/25">綠線：Strike</span>
+              <span class="rounded-full bg-amber-400/10 px-3 py-1 text-amber-200 ring-1 ring-amber-300/25">黃線：Dip</span>
+              <span class="rounded-full bg-rose-400/10 px-3 py-1 text-rose-200 ring-1 ring-rose-300/25">紅線：Slip/Rake</span>
+            </div>
+          </div>
+          <div id="mechanism3d" class="h-[540px] w-full rounded-[1.5rem] bg-slate-950/60"></div>
+          <p class="caption mt-4">立體焦球可想像成包住震源的一顆球。每一個方向代表某個測站從震源看出去的出射方向；若該方向的 P 波第一動為壓縮，就形成沙灘球的黑色象限；若為張裂，就形成白色象限。</p>
+        </div>
+
+        <div class="space-y-6">
+          <div class="card rounded-[2rem] p-5">
+            <div class="grid gap-5 md:grid-cols-[260px_1fr] md:items-center">
+              <div class="rounded-[1.5rem] bg-white p-4 shadow-inner">
+                <canvas id="mechanismBeachball" width="360" height="360" class="mx-auto rounded-full"></canvas>
+              </div>
+              <div>
+                <h3 class="text-2xl font-black">3D 焦球 → 2D 沙灘球</h3>
+                <p class="mt-3 leading-8 text-slate-300">沙灘球不是隨便畫出的圖案，而是把震源附近的立體焦球投影到平面。黑白象限的分界就是兩個節面：一個是輸入的斷層面，另一個是與它等效的輔助面。</p>
+                <div class="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+                  <div class="rounded-2xl bg-slate-800 p-3"><span class="block text-slate-400">Strike</span><b id="mechStrike" class="text-sky-200">0°</b></div>
+                  <div class="rounded-2xl bg-slate-800 p-3"><span class="block text-slate-400">Dip</span><b id="mechDip" class="text-sky-200">45°</b></div>
+                  <div class="rounded-2xl bg-slate-800 p-3"><span class="block text-slate-400">Slip</span><b id="mechRake" class="text-sky-200">90°</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-3 xl:grid-cols-1">
+            <article class="source-card rounded-3xl p-5">
+              <h4 class="text-lg font-black text-emerald-200">1｜Strike：斷層在地表的方向</h4>
+              <p class="mt-2 leading-7 text-slate-300">Strike 是斷層面和水平面相交的線，圖中用綠色線表示。把它想成斷層在地圖上延伸的方向，角度從正北順時針量測。</p>
+            </article>
+            <article class="source-card rounded-3xl p-5">
+              <h4 class="text-lg font-black text-amber-200">2｜Dip：斷層面往地下傾斜多少</h4>
+              <p class="mt-2 leading-7 text-slate-300">Dip 是斷層面相對水平面的傾斜角，圖中黃線指向下傾方向。Dip 越大，斷層面越接近垂直；Dip 越小，斷層面越平緩。</p>
+            </article>
+            <article class="source-card rounded-3xl p-5">
+              <h4 class="text-lg font-black text-rose-200">3｜Slip / Rake：斷層真正怎麼滑</h4>
+              <p class="mt-2 leading-7 text-slate-300">Slip 或 Rake 是上盤相對下盤在斷層面上的滑移方向，圖中紅色箭頭表示。它決定震源機制偏向走滑、正斷、逆斷或斜滑。</p>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-4 lg:grid-cols-4">
+        <div class="soft-card rounded-3xl p-5">
+          <p class="text-sm font-bold tracking-[.18em] text-cyan-300">STEP 01</p>
+          <h4 class="mt-2 text-xl font-black">先有斷層面</h4>
+          <p class="mt-3 text-sm leading-7 text-slate-300">Strike 與 Dip 決定藍色斷層面在空間中的位置，也決定沙灘球上其中一條黑白分界線。</p>
+        </div>
+        <div class="soft-card rounded-3xl p-5">
+          <p class="text-sm font-bold tracking-[.18em] text-cyan-300">STEP 02</p>
+          <h4 class="mt-2 text-xl font-black">再決定滑移方向</h4>
+          <p class="mt-3 text-sm leading-7 text-slate-300">Rake 決定紅色滑移箭頭在斷層面上往哪裡指，這會改變焦球各方向的壓縮或張裂分布。</p>
+        </div>
+        <div class="soft-card rounded-3xl p-5">
+          <p class="text-sm font-bold tracking-[.18em] text-cyan-300">STEP 03</p>
+          <h4 class="mt-2 text-xl font-black">形成兩個節面</h4>
+          <p class="mt-3 text-sm leading-7 text-slate-300">P 波初動由壓縮變成張裂的位置會形成兩條分界：斷層面與輔助面。兩者在沙灘球上都會畫出來。</p>
+        </div>
+        <div class="soft-card rounded-3xl p-5">
+          <p class="text-sm font-bold tracking-[.18em] text-cyan-300">STEP 04</p>
+          <h4 class="mt-2 text-xl font-black">投影成沙灘球</h4>
+          <p class="mt-3 text-sm leading-7 text-slate-300">把下半焦球壓到平面上，就得到報告中常見的沙灘球。黑色代表壓縮初動，白色代表張裂初動。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="beachball-section" class="mt-12">
+      <div class="mb-5 flex items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold tracking-[.25em] text-sky-300">INTERACTIVE BLOCK B</p>
+          <h2 class="mt-2 text-3xl font-black">沙灘球震源機制圖</h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-7 text-slate-400">沙灘球機制改成獨立區塊，不會跟 3D 斷層幾何擠在一起。這樣你報告時可以先講幾何，再往下講 P 波初動與節面判讀。</p>
+      </div>
+
+      <div class="grid gap-6 xl:grid-cols-[380px_1fr]">
+        <aside class="card rounded-[2rem] p-6">
+          <h3 class="text-2xl font-black">沙灘球控制台</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">這裡保留獨立的參數控制。你可以讓沙灘球與 3D 斷層幾何使用相同或不同參數，方便分段教學。</p>
+          <div class="mt-6 space-y-5">
+            <label class="block">
+              <div class="mb-2 flex justify-between text-sm"><span>走向 Strike</span><b id="bbStrikeVal">0°</b></div>
+              <input id="bbStrike" class="range w-full" type="range" min="0" max="360" value="0" />
+            </label>
+            <label class="block">
+              <div class="mb-2 flex justify-between text-sm"><span>傾角 Dip</span><b id="bbDipVal">45°</b></div>
+              <input id="bbDip" class="range w-full" type="range" min="0" max="90" value="45" />
+            </label>
+            <label class="block">
+              <div class="mb-2 flex justify-between text-sm"><span>滑移角 Slip</span><b id="bbRakeVal">90°</b></div>
+              <input id="bbRake" class="range w-full" type="range" min="-180" max="180" value="90" />
+            </label>
+          </div>
+
+          <div class="mt-6 grid grid-cols-2 gap-2 text-sm">
+            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="90" data-r="0">左移走滑</button>
+            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="90" data-r="180">右移走滑</button>
+            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="45" data-r="90">逆斷層</button>
+            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="45" data-r="-90">正斷層</button>
+            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="210" data-d="35" data-r="90">隱沒帶逆衝</button>
+            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="110" data-d="64" data-r="75">課堂範例</button>
+          </div>
+
+          <div class="mt-6 rounded-3xl bg-slate-950/70 p-5 ring-1 ring-white/10">
+            <p class="text-xs text-slate-400">目前判定</p>
+            <p id="bbFaultType" class="mt-2 text-xl font-black text-emerald-200">--</p>
+            <p id="bbFaultExplain" class="mt-3 text-sm leading-7 text-slate-300">--</p>
+            <div class="mt-4 grid grid-cols-2 gap-2 text-center text-xs">
+              <div class="rounded-2xl bg-slate-800 p-3"><span class="block text-slate-400">NP1</span><b id="bbNp1">--</b></div>
+              <div class="rounded-2xl bg-slate-800 p-3"><span class="block text-slate-400">NP2</span><b id="bbNp2">--</b></div>
+            </div>
+          </div>
+        </aside>
+
+        <div class="card rounded-[2rem] p-5">
+          <div class="mb-3 flex items-center justify-between gap-2"><h3 class="text-xl font-black">沙灘球機制即時繪製</h3><span class="text-xs text-slate-400">Canvas lower hemisphere</span></div>
+          <div class="rounded-[1.5rem] bg-white p-4">
+            <canvas id="beachball" width="520" height="520" class="mx-auto rounded-full"></canvas>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-3">
+            <span class="sim-chip rounded-full px-4 py-2 text-sm">黑色：壓縮初動</span>
+            <span class="sim-chip rounded-full px-4 py-2 text-sm">白色：張裂初動</span>
+            <span class="sim-chip rounded-full px-4 py-2 text-sm">兩條分界：節面（Fault plane / Auxiliary plane）</span>
+          </div>
+          <p class="caption mt-4">P 波初動只能決定兩個可能面，不能單獨判斷哪一個是實際破裂斷層，所以震源機制解通常會列出 NP1 與 NP2。若要判斷真實斷層面，還需結合餘震分布、地表破裂或測地資料。</p>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="event20260501" class="mt-12 card rounded-[2rem] p-6 md:p-8">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold tracking-[.25em] text-rose-300">CASE STUDY｜2026.05.01 YILAN OFFSHORE EARTHQUAKE</p>
+          <h2 class="mt-3 text-3xl font-black">5月1日 20:39 宜蘭東部海域地震：從官方資料到沙灘球判讀</h2>
+        </div>
+        <span class="rounded-full bg-rose-400/10 px-4 py-2 text-sm text-rose-200 ring-1 ring-rose-300/25">CWA ML 6.1｜USGS Mww 5.8</span>
+      </div>
+
+      <div class="mt-8 grid gap-5 lg:grid-cols-4">
+        <article class="source-card rounded-3xl p-5">
+          <p class="text-xs font-bold tracking-[.2em] text-slate-400">中央氣象署 CWA</p>
+          <h3 class="mt-2 text-xl font-black text-rose-200">有感地震報告第037號</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">發震時間為 115 年 5 月 1 日 20 時 39 分 55.5 秒，芮氏規模 6.1，震央位於北緯 24.93°、東經 122.08°，深度 98.3 公里。</p>
+        </article>
+        <article class="source-card rounded-3xl p-5">
+          <p class="text-xs font-bold tracking-[.2em] text-slate-400">相對位置</p>
+          <h3 class="mt-2 text-xl font-black text-rose-200">宜蘭縣政府東北東方 38.7 公里</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">震央位於臺灣東部海域，屬於臺灣東北部外海深部地震案例，可用來練習「震央位置」與「震源深度」分開解讀。</p>
+        </article>
+        <article class="source-card rounded-3xl p-5">
+          <p class="text-xs font-bold tracking-[.2em] text-slate-400">USGS Event Page</p>
+          <h3 class="mt-2 text-xl font-black text-sky-200">M 5.8｜29 km ENE of Yilan</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">USGS 事件頁列為 M 5.8 mww，時間為 2026-05-01 12:39:55 UTC，深度約 97.3 km；技術頁列有 W-phase moment tensor 產品。</p>
+        </article>
+        <article class="source-card rounded-3xl p-5">
+          <p class="text-xs font-bold tracking-[.2em] text-slate-400">Moment Tensor</p>
+          <h3 class="mt-2 text-xl font-black text-sky-200">W-phase 解：深部震源機制</h3>
+          <p class="mt-3 text-sm leading-7 text-slate-300">USGS 技術頁顯示可用矩張量產品包含 Mww 5.8、深度 90.5 km、Percent DC 71%。這表示主要成分接近雙偶力斷層滑移，但仍含非雙偶力成分或模型誤差。</p>
+        </article>
+      </div>
+
+      <div class="mt-8 grid gap-6 xl:grid-cols-[1.1fr_.9fr]">
+        <div class="source-card rounded-[2rem] p-5 md:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-2xl font-black">兩張沙灘球圖對比</h3>
+              <p class="mt-2 text-sm leading-7 text-slate-400">左圖為電腦繪製版本，右圖為手繪版本。使用下方滑桿可做重疊比較，觀察黑白象限、節面方向與視覺比例是否一致。</p>
+            </div>
+            <span class="rounded-full bg-sky-400/10 px-4 py-2 text-sm text-sky-200 ring-1 ring-sky-300/25">Computer vs Hand-drawn</span>
+          </div>
+
+          <div class="mt-5 grid gap-5 md:grid-cols-2">
+            <figure class="rounded-3xl bg-white p-3">
+              <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83.png" alt="2026年5月1日宜蘭地震沙灘球電腦繪圖" class="h-80 w-full object-contain" />
+              <figcaption class="mt-3 text-center text-sm font-semibold text-slate-700">電腦繪製：2026/05/01 宜蘭地震沙灘球</figcaption>
+            </figure>
+            <figure class="rounded-3xl bg-white p-3">
+              <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/%E6%89%8B%E7%B9%AA2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83.jpg" alt="2026年5月1日宜蘭地震沙灘球手繪圖" class="h-80 w-full object-contain" />
+              <figcaption class="mt-3 text-center text-sm font-semibold text-slate-700">手繪版本：節面與黑白象限練習</figcaption>
+            </figure>
+          </div>
+
+          <div class="mt-6 rounded-3xl bg-slate-950/50 p-4 ring-1 ring-white/10">
+            <div class="mb-3 flex items-center justify-between text-sm font-semibold text-slate-300">
+              <span>左側覆蓋：電腦繪製</span>
+              <span>右側底圖：手繪版本</span>
+            </div>
+            <div class="compare-frame aspect-[4/3]">
+              <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/%E6%89%8B%E7%B9%AA2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83.jpg" alt="手繪沙灘球底圖" />
+              <div id="compareOverlay" class="compare-overlay">
+                <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83.png" alt="電腦繪製沙灘球覆蓋圖" />
+              </div>
+              <div id="compareHandle" class="compare-handle"></div>
+            </div>
+            <label class="mt-4 block text-sm font-semibold text-slate-300">拖曳比較比例</label>
+            <input id="compareSlider" type="range" min="0" max="100" value="50" class="mt-2 w-full accent-sky-400" />
+          </div>
+        </div>
+
+        <div class="source-card rounded-[2rem] p-5 md:p-6">
+          <h3 class="text-2xl font-black">地震球／沙灘球的運作機制</h3>
+          <div class="mt-5 space-y-4 text-sm leading-8 text-slate-300">
+            <p><b class="text-sky-200">第一步：把地震當成斷層滑移。</b> 地震發生時，斷層兩側岩體相對滑動。震源機制用三個角度描述這個滑動：走向 Strike 決定斷層在地表上的方向，傾角 Dip 決定斷層向地下傾斜多陡，滑移角 Rake / Slip 決定上盤沿斷層面往哪裡動。</p>
+            <p><b class="text-sky-200">第二步：P 波初動分成壓縮與張裂。</b> 斷層破裂後，往不同方向傳出的 P 波第一下可能是「推向測站」的壓縮，也可能是「離開測站」的張裂。把許多測站的第一動方向投影回震源周圍，就會形成黑白相間的象限。</p>
+            <p><b class="text-sky-200">第三步：黑白邊界就是節面。</b> 黑色與白色區域的交界代表 P 波初動振幅接近 0 的方向，稱為節面。沙灘球通常有兩條節面：一條是真正滑動的斷層面，另一條是數學上等效的輔助面。</p>
+            <p><b class="text-sky-200">第四步：為什麼看不出真正斷層面？</b> 因為雙偶力震源具有對稱性，若把「斷層面」與「輔助面」互換，遠方測站看到的 P 波黑白象限幾乎相同。因此單靠沙灘球通常不能保證哪一面是真的，需要餘震排列、地表破裂、GPS 位移或區域構造來輔助判斷。</p>
+            <p><b class="text-sky-200">第五步：怎麼讀這顆球？</b> 若黑白象限像四瓣交錯，通常走滑成分明顯；若黑色或白色集中在上下方向，常與正斷或逆斷有關。更嚴謹的判讀仍需回到兩組節面解 NP1 / NP2 的 Strike、Dip、Rake。</p>
+          </div>
+          <div class="mt-6 rounded-3xl bg-slate-950/70 p-5 ring-1 ring-white/10">
+            <h4 class="font-black text-emerald-200">套用到 2026/05/01 宜蘭地震</h4>
+            <p class="mt-3 text-sm leading-7 text-slate-300">這起地震深度約 98 km，震源位於臺灣東北部外海下方，因此沙灘球不是在描述地表哪條斷層裂開，而是在描述深部震源區的等效剪切破裂方向。USGS 的 W-phase moment tensor 屬於長週期波形反演，適合快速估計中大型地震的震源機制；中央氣象署資料則提供臺灣區域觀測、震度與位置描述。兩者規模不同，是因為使用的規模定義與資料處理方法不同，不應直接視為矛盾。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery" class="mt-12 card rounded-[2rem] p-6 md:p-8">
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold tracking-[.25em] text-amber-300">CHAPTER FIGURES</p>
+          <h2 class="mt-3 text-3xl font-black">章節圖片與學習說明</h2>
+        </div>
+        <p class="max-w-xl text-sm leading-7 text-slate-400">圖片來源設定為 GitHub raw 圖檔連結，放進 GitHub Pages 後可直接顯示。若圖片沒有出現，請確認檔名大小寫與 repo 路徑完全一致。</p>
+      </div>
+      <div id="figureGrid" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3"></div>
+    </section>
+
+    <section id="concepts" class="mt-12 grid gap-6 lg:grid-cols-3">
+      <details class="card rounded-3xl p-6" open>
+        <summary class="cursor-pointer text-xl font-black text-sky-200">為何會有兩組 Strike/Dip/Rake？</summary>
+        <p class="mt-4 leading-8 text-slate-300">P 波初動形成的兩個節面彼此互相垂直：一個是實際斷層面，另一個是輔助面。從遠方測站看到的壓縮／張裂象限，對這兩個面會產生相同的輻射圖樣，所以單靠沙灘球通常不能判斷哪一面真的破裂。這就是震源機制解常列出 NP1 與 NP2 的原因。</p>
+      </details>
+      <details class="card rounded-3xl p-6" open>
+        <summary class="cursor-pointer text-xl font-black text-sky-200">P 軸與 T 軸怎麼看？</summary>
+        <p class="mt-4 leading-8 text-slate-300">P 軸代表最大壓縮方向，位在張裂象限的角平分方向；T 軸代表最小壓縮方向，位在壓縮象限的角平分方向。B 軸或 null axis 則同時垂直 P 軸與 T 軸，也對應兩個節面的交線。</p>
+      </details>
+      <details class="card rounded-3xl p-6" open>
+        <summary class="cursor-pointer text-xl font-black text-sky-200">走滑、正斷、逆斷如何快速判讀？</summary>
+        <p class="mt-4 leading-8 text-slate-300">滑移角接近 0° 或 ±180° 時以走滑為主；接近 +90° 時，上盤沿傾向向上，為逆斷或逆衝；接近 -90° 時，上盤向下，為正斷。若介於中間，則屬於斜滑斷層。</p>
+      </details>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-800 px-5 py-8 text-center text-sm text-slate-500">
+    SeismoCore Chapter 4｜地震、斷層幾何與震源機制案例學習
+  </footer>
+
+  <script>
+    const figures = [
+      {file:'4.1-2.png', title:'Fig. 4.1-2｜1906 年舊金山地震斷層滑移量', cap:'圖中將聖安地列斯斷層破裂段與沿線地表滑移量結合，說明大地震不是單點事件，而是沿著一段斷層發生有限長度的破裂與位移。'},
+      {file:'4.1-3.png', title:'Fig. 4.1-3｜彈性回跳理論示意', cap:'斷層被鎖住時，兩側岩體持續受板塊運動推擠而彈性變形；破裂瞬間釋放累積應變，地表線性標誌物被錯開。'},
+      {file:'4.2-2.png', title:'Fig. 4.2-2｜斷層幾何座標系統', cap:'用走向 φ、傾角 δ、滑移角 λ 描述斷層面與上盤相對下盤的運動方向，是震源機制解的基本語言。'},
+      {file:'4.2-3.png', title:'Fig. 4.2-3｜基本斷層型態', cap:'展示左移、右移、正斷層與逆斷層。滑移角接近 0°、180°、-90°、90° 時分別對應典型端元型態。'},
+      {file:'4.2-4.png', title:'Fig. 4.2-4｜P 波初動與節面', cap:'不同測站會記錄到壓縮或張裂初動，兩種極性的分界形成兩個節面；這也是沙灘球黑白象限的物理基礎。'},
+      {file:'4.2-14.png', title:'Fig. 4.2-14｜典型震源機制球', cap:'比較走滑、逆斷與正斷震源機制在焦球投影上的差異，可用來快速判斷地震所代表的主要應力環境。'},
+      {file:'4.2-15.png', title:'Fig. 4.2-15｜滑移角改變造成的沙灘球轉換', cap:'在相同斷層走向下，滑移角由逆斷逐漸轉為走滑再到正斷時，沙灘球象限也會連續改變。'}
+    ];
+    const rawBase = 'https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/';
+    const figureGrid = document.getElementById('figureGrid');
+    figureGrid.innerHTML = figures.map(f => `
+      <article class="soft-card overflow-hidden rounded-3xl">
+        <div class="aspect-[4/3] bg-slate-900">
+          <img src="${rawBase}${f.file}" alt="${f.title}" class="h-full w-full object-contain p-3" loading="lazy" />
+        </div>
+        <div class="p-5">
+          <h3 class="font-black text-slate-100">${f.title}</h3>
+          <p class="caption mt-2">${f.cap}</p>
+        </div>
+      </article>`).join('');
+
+    const deg = Math.PI / 180;
+    function normalizeAngle(a){ let x = a % 360; return x < 0 ? x + 360 : x; }
+    function cross(a,b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+    function dot(a,b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
+    function norm(a){ const m=Math.hypot(...a)||1; return a.map(v=>v/m); }
+    function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
+
+    function classifyRake(rake){
+      const r = rake;
+      if (Math.abs(r) <= 22.5) return ['左移斷層 (Left-lateral)', '滑移幾乎沿著走向，滑移角接近 0°，以上盤相對下盤左移為主。'];
+      if (Math.abs(Math.abs(r) - 180) <= 22.5) return ['右移斷層 (Right-lateral)', '滑移幾乎沿著走向，滑移角接近 ±180°，以上盤相對下盤右移為主。'];
+      if (Math.abs(r - 90) <= 22.5) return ['逆斷層 (Reverse Fault)', '上盤沿斷層面向上移動，反映擠壓環境；若傾角較低，常稱為逆衝斷層。'];
+      if (Math.abs(r + 90) <= 22.5) return ['正斷層 (Normal Fault)', '上盤沿斷層面向下移動，常見於張裂環境、地塹或伸張構造。'];
+      if (r > 0 && r < 90) return ['斜滑斷層 (逆斷 + 左移)', '同時包含擠壓抬升與左移走滑分量。'];
+      if (r > 90 && r < 180) return ['斜滑斷層 (逆斷 + 右移)', '同時包含擠壓抬升與右移走滑分量。'];
+      if (r < 0 && r > -90) return ['斜滑斷層 (正斷 + 左移)', '同時包含張裂下陷與左移走滑分量。'];
+      return ['斜滑斷層 (正斷 + 右移)', '同時包含張裂下陷與右移走滑分量。'];
+    }
+
+    // Vectors in East, North, Up coordinates.
+    function faultVectors(strike, dip, rake){
+      const S = strike * deg, D = dip * deg, R = rake * deg;
+      const strikeVec = [Math.sin(S), Math.cos(S), 0];
+      const downDip = [Math.cos(S)*Math.cos(D), -Math.sin(S)*Math.cos(D), -Math.sin(D)];
+      const normal = cross(strikeVec, downDip);
+      const slip = [
+        Math.cos(R)*strikeVec[0] + Math.sin(R)*(-downDip[0]),
+        Math.cos(R)*strikeVec[1] + Math.sin(R)*(-downDip[1]),
+        Math.cos(R)*strikeVec[2] + Math.sin(R)*(-downDip[2])
+      ];
+      return {strikeVec, downDip, normal: norm(normal), slip: norm(slip)};
+    }
+
+    function ampForDir(r, n, s){ return 2 * dot(r,n) * dot(r,s); }
+    function sdrFromNormalSlip(normal, slip){
+      const up = [0,0,1];
+      let u = cross(up, normal);
+      if(Math.hypot(...u) < 1e-6) u = [0,1,0];
+      u = norm(u);
+      let v = cross(normal, u);
+      if(v[2] > 0){ u = u.map(x=>-x); v = cross(normal, u); }
+      const strike = Math.round(normalizeAngle(Math.atan2(u[0], u[1]) / deg));
+      const dip = Math.round(Math.asin(Math.max(-1, Math.min(1, -v[2]))) / deg);
+      const cosR = dot(slip, u);
+      const sinR = dot(slip, v.map(x=>-x));
+      let rake = Math.round(Math.atan2(sinR, cosR) / deg);
+      if(rake > 180) rake -= 360;
+      if(rake <= -180) rake += 360;
+      return {strike, dip, rake};
+    }
+
+    function drawBeachball(canvas, strike, dip, rake){
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height, cx = W/2, cy = H/2, R = Math.min(W,H)*0.46;
+      const img = ctx.createImageData(W,H);
+      const {normal, slip} = faultVectors(strike, dip, rake);
+      for(let y=0; y<H; y++){
+        for(let x=0; x<W; x++){
+          const X = (x-cx)/R, Y = (y-cy)/R;
+          const rr = X*X + Y*Y;
+          const idx = (y*W+x)*4;
+          if(rr <= 1){
+            const Z = -Math.sqrt(Math.max(0, 1-rr));
+            const east = X, north = -Y, up = Z;
+            const a = ampForDir([east,north,up], normal, slip);
+            if(a >= 0){ img.data[idx]=12; img.data[idx+1]=17; img.data[idx+2]=29; img.data[idx+3]=255; }
+            else { img.data[idx]=248; img.data[idx+1]=250; img.data[idx+2]=252; img.data[idx+3]=255; }
+          } else { img.data[idx]=255; img.data[idx+1]=255; img.data[idx+2]=255; img.data[idx+3]=0; }
+        }
+      }
+      ctx.putImageData(img,0,0);
+      ctx.beginPath(); ctx.arc(cx,cy,R,0,2*Math.PI); ctx.lineWidth=5; ctx.strokeStyle='#0f172a'; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, cy-R); ctx.lineTo(cx, cy+R); ctx.moveTo(cx-R, cy); ctx.lineTo(cx+R, cy); ctx.lineWidth=1; ctx.strokeStyle='rgba(148,163,184,.55)'; ctx.stroke();
+      ctx.font='bold 18px system-ui'; ctx.fillStyle='#0f172a'; ctx.textAlign='center'; ctx.fillText('N', cx, cy-R-12); ctx.fillText('S', cx, cy+R+28); ctx.fillText('E', cx+R+18, cy+6); ctx.fillText('W', cx-R-18, cy+6);
+    }
+
+    function buildGroundGrid(size=5, step=1){
+      const traces = [];
+      for(let x=-size; x<=size; x+=step){
+        traces.push({type:'scatter3d', mode:'lines', x:[x,x], y:[-size,size], z:[0,0], line:{color:'rgba(160,160,160,.45)', width:2}, hoverinfo:'skip', showlegend:false});
+      }
+      for(let y=-size; y<=size; y+=step){
+        traces.push({type:'scatter3d', mode:'lines', x:[-size,size], y:[y,y], z:[0,0], line:{color:'rgba(160,160,160,.45)', width:2}, hoverinfo:'skip', showlegend:false});
+      }
+      return traces;
+    }
+
+
+    function planeCircleTrace(normal, color, name, width=6){
+      normal = norm(normal);
+      let a = Math.abs(normal[2]) < .92 ? cross(normal, [0,0,1]) : cross(normal, [0,1,0]);
+      a = norm(a);
+      const b = norm(cross(normal, a));
+      const xs=[], ys=[], zs=[];
+      for(let i=0;i<=160;i++){
+        const t = 2*Math.PI*i/160;
+        const p = [Math.cos(t)*a[0] + Math.sin(t)*b[0], Math.cos(t)*a[1] + Math.sin(t)*b[1], Math.cos(t)*a[2] + Math.sin(t)*b[2]];
+        xs.push(p[0]); ys.push(p[1]); zs.push(p[2]);
+      }
+      return {type:'scatter3d', mode:'lines', x:xs, y:ys, z:zs, line:{color, width}, hoverinfo:'skip', name};
+    }
+
+    function planeDiskTrace(normal, color, name, opacity=.18){
+      normal = norm(normal);
+      let a = Math.abs(normal[2]) < .92 ? cross(normal, [0,0,1]) : cross(normal, [0,1,0]);
+      a = norm(a);
+      const b = norm(cross(normal, a));
+      const xs=[0], ys=[0], zs=[0], i=[], j=[], k=[];
+      const N = 96;
+      for(let idx=0; idx<N; idx++){
+        const t = 2*Math.PI*idx/N;
+        const p = [Math.cos(t)*a[0] + Math.sin(t)*b[0], Math.cos(t)*a[1] + Math.sin(t)*b[1], Math.cos(t)*a[2] + Math.sin(t)*b[2]];
+        xs.push(p[0]); ys.push(p[1]); zs.push(p[2]);
+      }
+      for(let idx=1; idx<=N; idx++){ i.push(0); j.push(idx); k.push(idx===N?1:idx+1); }
+      return {type:'mesh3d', x:xs, y:ys, z:zs, i, j, k, color, opacity, hoverinfo:'skip', name, showscale:false};
+    }
+
+    function focalSphereTrace(normal, slip){
+      const xs=[], ys=[], zs=[], colors=[];
+      const nTheta=34, nPhi=68;
+      for(let a=0; a<=nTheta; a++){
+        const theta = (Math.PI/2) * a/nTheta; // lower hemisphere only: z <= 0
+        for(let b=0; b<=nPhi; b++){
+          const phi = 2*Math.PI*b/nPhi;
+          const x = Math.sin(theta)*Math.cos(phi);
+          const y = Math.sin(theta)*Math.sin(phi);
+          const z = -Math.cos(theta);
+          xs.push(x); ys.push(y); zs.push(z);
+          const amp = ampForDir([x,y,z], normal, slip);
+          colors.push(amp >= 0 ? 1 : 0);
+        }
+      }
+      return {
+        type:'scatter3d', mode:'markers', x:xs, y:ys, z:zs,
+        marker:{size:3.2, color:colors, colorscale:[[0,'rgb(248,250,252)'],[.49,'rgb(248,250,252)'],[.5,'rgb(15,23,42)'],[1,'rgb(15,23,42)']], opacity:.72, line:{width:0}},
+        hoverinfo:'skip', showlegend:false, name:'Lower focal hemisphere'
+      };
+    }
+
+    function updateMechanism3D(strike, dip, rake){
+      const {strikeVec:u, downDip:v, slip:s, normal:n} = faultVectors(strike, dip, rake);
+      const auxNormal = s;
+      const strikeLine = {type:'scatter3d', mode:'lines+text', x:[-1.25*u[0],1.25*u[0]], y:[-1.25*u[1],1.25*u[1]], z:[-1.25*u[2],1.25*u[2]], line:{color:'#10b981', width:8}, text:['','Strike'], textposition:'top center', textfont:{color:'#a7f3d0', size:13}, hoverinfo:'skip', name:'Strike'};
+      const dipLine = {type:'scatter3d', mode:'lines+text', x:[0,1.1*v[0]], y:[0,1.1*v[1]], z:[0,1.1*v[2]], line:{color:'#f59e0b', width:8}, text:['','Dip'], textposition:'bottom center', textfont:{color:'#fde68a', size:13}, hoverinfo:'skip', name:'Dip direction'};
+      const slipLine = {type:'scatter3d', mode:'lines+markers+text', x:[0,1.15*s[0]], y:[0,1.15*s[1]], z:[0,1.15*s[2]], line:{color:'#e11d48', width:9}, marker:{size:[3,7], color:'#e11d48'}, text:['','Slip / Rake'], textposition:'top center', textfont:{color:'#fecdd3', size:13}, hoverinfo:'skip', name:'Slip / Rake'};
+      const normalLine = {type:'scatter3d', mode:'lines+text', x:[0,.95*n[0]], y:[0,.95*n[1]], z:[0,.95*n[2]], line:{color:'#818cf8', width:5, dash:'dot'}, text:['','Normal'], textposition:'top center', textfont:{color:'#c7d2fe', size:12}, hoverinfo:'skip', name:'Normal'};
+      const axes = {type:'scatter3d', mode:'lines+text', x:[0,1.35, null,0,0, null,0,0], y:[0,0, null,0,1.35, null,0,0], z:[0,0, null,0,0, null,0,1.35], line:{color:'rgba(148,163,184,.65)', width:3}, text:['','E','','','N','','','Up'], textfont:{color:'#cbd5e1', size:12}, hoverinfo:'skip', showlegend:false};
+
+      const traces = [
+        focalSphereTrace(n, s),
+        planeDiskTrace(n, '#38bdf8', 'Fault plane', .16),
+        planeDiskTrace(auxNormal, '#a78bfa', 'Auxiliary plane', .13),
+        planeCircleTrace(n, '#38bdf8', 'Fault-plane nodal line', 7),
+        planeCircleTrace(auxNormal, '#a78bfa', 'Auxiliary nodal line', 7),
+        strikeLine, dipLine, slipLine, normalLine, axes
+      ];
+      Plotly.react('mechanism3d', traces, {
+        margin:{l:0,r:0,t:0,b:0}, paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+        scene:{
+          xaxis:{title:'East', color:'#94a3b8', gridcolor:'rgba(148,163,184,.16)', range:[-1.55,1.55], zeroline:false},
+          yaxis:{title:'North', color:'#94a3b8', gridcolor:'rgba(148,163,184,.16)', range:[-1.55,1.55], zeroline:false},
+          zaxis:{title:'Up', color:'#94a3b8', gridcolor:'rgba(148,163,184,.16)', range:[-1.55,1.55], zeroline:false},
+          aspectmode:'cube', camera:{eye:{x:1.45,y:1.25,z:.85}}, bgcolor:'rgba(0,0,0,0)'
+        },
+        legend:{font:{color:'#cbd5e1'}, bgcolor:'rgba(15,23,42,.55)', orientation:'h', x:0, y:1.03}
+      }, {responsive:true, displaylogo:false});
+      const ms = document.getElementById('mechStrike');
+      const md = document.getElementById('mechDip');
+      const mr = document.getElementById('mechRake');
+      if(ms) ms.textContent = `${strike}°`;
+      if(md) md.textContent = `${dip}°`;
+      if(mr) mr.textContent = `${rake}°`;
+      const c = document.getElementById('mechanismBeachball');
+      if(c) drawBeachball(c, strike, dip, rake);
+    }
+
+    function update3D(strike, dip, rake, showSlip=true){
+      const {strikeVec:u, downDip:v, slip:s, normal:n} = faultVectors(strike, dip, rake);
+      const L = 3.2, W = 2.6;
+      const pts = [
+        [-L*u[0]-W*v[0], -L*u[1]-W*v[1], -L*u[2]-W*v[2]],
+        [ L*u[0]-W*v[0],  L*u[1]-W*v[1],  L*u[2]-W*v[2]],
+        [ L*u[0]+W*v[0],  L*u[1]+W*v[1],  L*u[2]+W*v[2]],
+        [-L*u[0]+W*v[0], -L*u[1]+W*v[1], -L*u[2]+W*v[2]],
+      ];
+      const plane = {type:'mesh3d', x:pts.map(p=>p[0]), y:pts.map(p=>p[1]), z:pts.map(p=>p[2]), i:[0,0], j:[1,2], k:[2,3], opacity:.45, color:'#60a5fa', hoverinfo:'skip', name:'Fault plane'};
+
+      const topBlock = {type:'mesh3d',
+        x:[-2.2, 2.2, 2.2, -2.2, -2.2, 2.2, 2.2, -2.2],
+        y:[-1.9,-1.9, 1.9, 1.9, -1.9,-1.9, 1.9, 1.9],
+        z:[0.2,0.2,0.2,0.2, 2.3,2.3,2.3,2.3],
+        i:[0,0,0,1,1,2,4,4,5,6,3,2],
+        j:[1,2,4,2,5,3,5,6,6,7,7,7],
+        k:[2,4,5,5,6,7,6,7,2,3,0,3],
+        color:'#2563eb', opacity:.98, hoverinfo:'skip', name:'Hanging wall block'};
+
+      const traces = [...buildGroundGrid(5,1), plane, topBlock];
+
+      if(showSlip){
+        traces.push({type:'scatter3d', mode:'lines+markers', x:[0,1.6*s[0]], y:[0,1.6*s[1]], z:[1.8,1.8+1.6*s[2]], line:{width:8,color:'#dc2626'}, marker:{size:[2,5], color:'#dc2626'}, hoverinfo:'skip', name:'Slip vector'});
+      }
+
+      Plotly.react('plot3d', traces, {
+        margin:{l:0,r:0,t:0,b:0},
+        paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+        scene:{
+          xaxis:{visible:false, range:[-5,5]},
+          yaxis:{visible:false, range:[-5,5]},
+          zaxis:{visible:false, range:[-3,4]},
+          aspectmode:'manual', aspectratio:{x:1.25,y:1.25,z:.85},
+          camera:{eye:{x:1.55,y:1.45,z:.8}},
+          bgcolor:'rgba(0,0,0,0)'
+        },
+        showlegend:false
+      }, {responsive:true, displaylogo:false, modeBarButtonsToRemove:['select2d','lasso2d']});
+    }
+
+    // --- Fault geometry block ---
+    const geom = {
+      strike: document.getElementById('geomStrike'),
+      dip: document.getElementById('geomDip'),
+      rake: document.getElementById('geomRake'),
+      strikeN: document.getElementById('geomStrikeNumber'),
+      dipN: document.getElementById('geomDipNumber'),
+      rakeN: document.getElementById('geomRakeNumber'),
+      showSlip: document.getElementById('geomShowSlip'),
+      type: document.getElementById('faultGeomType'),
+      summary: document.getElementById('faultGeomSummary'),
+      reset: document.getElementById('geomReset')
+    };
+
+    function syncGeomInputs(source){
+      if(source === 'range'){
+        geom.strikeN.value = geom.strike.value;
+        geom.dipN.value = geom.dip.value;
+        geom.rakeN.value = geom.rake.value;
+      } else {
+        geom.strike.value = clamp(+geom.strikeN.value || 0, 0, 360);
+        geom.dip.value = clamp(+geom.dipN.value || 0, 0, 90);
+        geom.rake.value = clamp(+geom.rakeN.value || 0, -180, 180);
+        geom.strikeN.value = geom.strike.value;
+        geom.dipN.value = geom.dip.value;
+        geom.rakeN.value = geom.rake.value;
+      }
+    }
+
+    function updateGeomBlock(){
+      syncGeomInputs('range');
+      const strike = +geom.strike.value, dip = +geom.dip.value, rake = +geom.rake.value;
+      const [type] = classifyRake(rake);
+      geom.type.textContent = type;
+      geom.summary.textContent = `${strike}° / ${dip}° / ${rake}°`;
+      update3D(strike, dip, rake, geom.showSlip.checked);
+      updateMechanism3D(strike, dip, rake);
+    }
+
+    [geom.strike, geom.dip, geom.rake].forEach(i => i.addEventListener('input', updateGeomBlock));
+    [geom.strikeN, geom.dipN, geom.rakeN].forEach(i => i.addEventListener('change', () => { syncGeomInputs('number'); updateGeomBlock(); }));
+    geom.showSlip.addEventListener('change', updateGeomBlock);
+    geom.reset.addEventListener('click', () => {
+      geom.strike.value = 0; geom.dip.value = 45; geom.rake.value = 90;
+      syncGeomInputs('range');
+      geom.showSlip.checked = true;
+      updateGeomBlock();
+    });
+
+    // --- Beachball block ---
+    const bb = {
+      strike: document.getElementById('bbStrike'),
+      dip: document.getElementById('bbDip'),
+      rake: document.getElementById('bbRake'),
+      strikeVal: document.getElementById('bbStrikeVal'),
+      dipVal: document.getElementById('bbDipVal'),
+      rakeVal: document.getElementById('bbRakeVal'),
+      type: document.getElementById('bbFaultType'),
+      explain: document.getElementById('bbFaultExplain'),
+      np1: document.getElementById('bbNp1'),
+      np2: document.getElementById('bbNp2')
+    };
+
+    function updateBeachballBlock(){
+      const strike = +bb.strike.value, dip = +bb.dip.value, rake = +bb.rake.value;
+      bb.strikeVal.textContent = `${strike}°`;
+      bb.dipVal.textContent = `${dip}°`;
+      bb.rakeVal.textContent = `${rake}°`;
+      const [type, explain] = classifyRake(rake);
+      bb.type.textContent = type;
+      bb.explain.textContent = explain;
+      bb.np1.textContent = `${strike}/${dip}/${rake}`;
+      const fv = faultVectors(strike, dip, rake);
+      const auxSdr = sdrFromNormalSlip(fv.slip, fv.normal);
+      bb.np2.textContent = `${auxSdr.strike}/${auxSdr.dip}/${auxSdr.rake}`;
+      drawBeachball(document.getElementById('beachball'), strike, dip, rake);
+    }
+    [bb.strike, bb.dip, bb.rake].forEach(sl => sl.addEventListener('input', updateBeachballBlock));
+    document.querySelectorAll('.bb-preset').forEach(btn => btn.addEventListener('click', () => {
+      bb.strike.value=btn.dataset.s; bb.dip.value=btn.dataset.d; bb.rake.value=btn.dataset.r; updateBeachballBlock();
+    }));
+
+
+
+    const compareSlider = document.getElementById('compareSlider');
+    const compareOverlay = document.getElementById('compareOverlay');
+    const compareHandle = document.getElementById('compareHandle');
+    function updateCompare(){
+      if(!compareSlider || !compareOverlay || !compareHandle) return;
+      const v = compareSlider.value;
+      compareOverlay.style.clipPath = `inset(0 ${100 - v}% 0 0)`;
+      compareHandle.style.left = `${v}%`;
+    }
+    if(compareSlider){ compareSlider.addEventListener('input', updateCompare); updateCompare(); }
+
+    window.addEventListener('resize', () => {
+      update3D(+geom.strike.value, +geom.dip.value, +geom.rake.value, geom.showSlip.checked);
+      updateMechanism3D(+geom.strike.value, +geom.dip.value, +geom.rake.value);
+    });
+    syncGeomInputs('range');
+    updateGeomBlock();
+    updateBeachballBlock();
+  </script>
+</body>
+</html>
