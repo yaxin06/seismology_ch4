@@ -355,6 +355,12 @@
             <span class="sim-chip rounded-full px-4 py-2 text-sm">兩條分界：節面（Fault plane / Auxiliary plane）</span>
           </div>
           <p class="caption mt-4">P 波初動只能決定兩個可能面，不能單獨判斷哪一個是實際破裂斷層，所以震源機制解通常會列出 NP1 與 NP2。若要判斷真實斷層面，還需結合餘震分布、地表破裂或測地資料。</p>
+          <div class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">正斷層</p><p class="mt-2 text-xs leading-6 text-slate-300">中央白色張裂象限，兩側黑色壓縮象限。</p></div>
+            <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">逆斷層</p><p class="mt-2 text-xs leading-6 text-slate-300">中央黑色壓縮象限，兩側白色張裂象限。</p></div>
+            <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">左移走滑</p><p class="mt-2 text-xs leading-6 text-slate-300">以 N-S 斷層為例，NE / SW 為黑色壓縮象限。</p></div>
+            <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">右移走滑</p><p class="mt-2 text-xs leading-6 text-slate-300">以 N-S 斷層為例，NW / SE 為黑色壓縮象限。</p></div>
+          </div>
         </div>
       </div>
     </section>
@@ -408,7 +414,7 @@
               <figcaption class="mt-3 text-center text-sm font-semibold text-slate-700">電腦繪製：2026/05/01 宜蘭地震沙灘球</figcaption>
             </figure>
             <figure class="rounded-3xl bg-white p-3">
-              <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/%E6%89%8B%E7%B9%AA2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83.jpg" alt="2026年5月1日宜蘭地震沙灘球手繪圖" class="h-80 w-full object-contain" />
+              <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/%E6%89%8B%E7%B9%AA2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83_new.jpg" alt="2026年5月1日宜蘭地震沙灘球手繪圖" class="h-80 w-full object-contain" />
               <figcaption class="mt-3 text-center text-sm font-semibold text-slate-700">手繪版本：節面與黑白象限練習</figcaption>
             </figure>
           </div>
@@ -419,7 +425,7 @@
               <span>右側底圖：手繪版本</span>
             </div>
             <div class="compare-frame aspect-[4/3]">
-              <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/%E6%89%8B%E7%B9%AA2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83.jpg" alt="手繪沙灘球底圖" />
+              <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/%E6%89%8B%E7%B9%AA2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83_new.jpg" alt="手繪沙灘球底圖" />
               <div id="compareOverlay" class="compare-overlay">
                 <img src="https://raw.githubusercontent.com/yaxin06/seismology_ch4/main/2025.05.01%E5%9C%B0%E9%9C%87%E6%B2%99%E7%81%98%E7%90%83.png" alt="電腦繪製沙灘球覆蓋圖" />
               </div>
@@ -438,6 +444,7 @@
             <p><b class="text-sky-200">第三步：黑白邊界就是節面。</b> 黑色與白色區域的交界代表 P 波初動振幅接近 0 的方向，稱為節面。沙灘球通常有兩條節面：一條是真正滑動的斷層面，另一條是數學上等效的輔助面。</p>
             <p><b class="text-sky-200">第四步：為什麼看不出真正斷層面？</b> 因為雙偶力震源具有對稱性，若把「斷層面」與「輔助面」互換，遠方測站看到的 P 波黑白象限幾乎相同。因此單靠沙灘球通常不能保證哪一面是真的，需要餘震排列、地表破裂、GPS 位移或區域構造來輔助判斷。</p>
             <p><b class="text-sky-200">第五步：怎麼讀這顆球？</b> 若黑白象限像四瓣交錯，通常走滑成分明顯；若黑色或白色集中在上下方向，常與正斷或逆斷有關。更嚴謹的判讀仍需回到兩組節面解 NP1 / NP2 的 Strike、Dip、Rake。</p>
+            <p><b class="text-emerald-200">校正後的端元判讀：</b> 正斷層的 P 軸多接近垂直方向，因此沙灘球中央應呈現張裂象限，也就是白色橢圓區；逆斷層的 T 軸多接近垂直方向，因此中央會轉為黑色壓縮象限。這與課堂常見圖示一致。</p>
           </div>
           <div class="mt-6 rounded-3xl bg-slate-950/70 p-5 ring-1 ring-white/10">
             <h4 class="font-black text-emerald-200">套用到 2026/05/01 宜蘭地震</h4>
@@ -469,7 +476,7 @@
       </details>
       <details class="card rounded-3xl p-6" open>
         <summary class="cursor-pointer text-xl font-black text-sky-200">走滑、正斷、逆斷如何快速判讀？</summary>
-        <p class="mt-4 leading-8 text-slate-300">滑移角接近 0° 或 ±180° 時以走滑為主；接近 +90° 時，上盤沿傾向向上，為逆斷或逆衝；接近 -90° 時，上盤向下，為正斷。若介於中間，則屬於斜滑斷層。</p>
+        <p class="mt-4 leading-8 text-slate-300">滑移角接近 0° 或 ±180° 時以走滑為主；接近 +90° 時，上盤沿傾向向上，為逆斷或逆衝，典型沙灘球中央為黑色；接近 -90° 時，上盤向下，為正斷，典型沙灘球中央為白色。若介於中間，則屬於斜滑斷層。</p>
       </details>
     </section>
 
@@ -527,6 +534,16 @@
       const strikeVec = [Math.sin(S), Math.cos(S), 0];
       const downDip = [Math.cos(S)*Math.cos(D), -Math.sin(S)*Math.cos(D), -Math.sin(D)];
       const normal = cross(strikeVec, downDip);
+      // Slip / Rake convention used in focal-mechanism teaching:
+      // rake =   0°  → left-lateral strike-slip
+      // rake = 180°  → right-lateral strike-slip
+      // rake =  90°  → reverse fault
+      // rake = -90°  → normal fault
+      //
+      // The slip vector follows the strike direction at rake = 0°. With black =
+      // compressional first motion, this gives the standard end-member patterns:
+      // normal = central white, reverse = central black, left/right strike-slip =
+      // opposite four-quadrant polarities.
       const slip = [
         Math.cos(R)*strikeVec[0] + Math.sin(R)*(-downDip[0]),
         Math.cos(R)*strikeVec[1] + Math.sin(R)*(-downDip[1]),
@@ -567,7 +584,10 @@
             const Z = -Math.sqrt(Math.max(0, 1-rr));
             const east = X, north = -Y, up = Z;
             const a = ampForDir([east,north,up], normal, slip);
-            if(a >= 0){ img.data[idx]=12; img.data[idx+1]=17; img.data[idx+2]=29; img.data[idx+3]=255; }
+            // 地震學慣例：黑色為壓縮初動，白色為張裂初動。
+            // 本模型已依端元斷層校正：正斷層中央白、逆斷層中央黑；
+            // N-S 左移走滑為 NE/SW 黑色壓縮象限，右移走滑為 NW/SE 黑色壓縮象限。
+            if(a < 0){ img.data[idx]=12; img.data[idx+1]=17; img.data[idx+2]=29; img.data[idx+3]=255; }
             else { img.data[idx]=248; img.data[idx+1]=250; img.data[idx+2]=252; img.data[idx+3]=255; }
           } else { img.data[idx]=255; img.data[idx+1]=255; img.data[idx+2]=255; img.data[idx+3]=0; }
         }
@@ -632,7 +652,7 @@
           const z = -Math.cos(theta);
           xs.push(x); ys.push(y); zs.push(z);
           const amp = ampForDir([x,y,z], normal, slip);
-          colors.push(amp >= 0 ? 1 : 0);
+          colors.push(amp < 0 ? 1 : 0);
         }
       }
       return {
