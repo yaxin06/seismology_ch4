@@ -325,8 +325,7 @@
           </div>
 
           <div class="mt-6 grid grid-cols-2 gap-2 text-sm">
-            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="90" data-r="0">左移走滑</button>
-            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="90" data-r="180">右移走滑</button>
+            <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="90" data-r="0">走向滑移斷層</button>
             <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="45" data-r="90">逆斷層</button>
             <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="0" data-d="45" data-r="-90">正斷層</button>
             <button class="bb-preset rounded-2xl bg-slate-800 px-3 py-2 hover:bg-slate-700" data-s="210" data-d="35" data-r="90">隱沒帶逆衝</button>
@@ -355,11 +354,10 @@
             <span class="sim-chip rounded-full px-4 py-2 text-sm">兩條分界：節面（Fault plane / Auxiliary plane）</span>
           </div>
           <p class="caption mt-4">P 波初動只能決定兩個可能面，不能單獨判斷哪一個是實際破裂斷層，所以震源機制解通常會列出 NP1 與 NP2。若要判斷真實斷層面，還需結合餘震分布、地表破裂或測地資料。</p>
-          <div class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div class="mt-5 grid gap-3 md:grid-cols-3">
             <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">正斷層</p><p class="mt-2 text-xs leading-6 text-slate-300">中央白色張裂象限，兩側黑色壓縮象限。</p></div>
             <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">逆斷層</p><p class="mt-2 text-xs leading-6 text-slate-300">中央黑色壓縮象限，兩側白色張裂象限。</p></div>
-            <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">左移走滑</p><p class="mt-2 text-xs leading-6 text-slate-300">以 N-S 斷層為例，NE / SW 為黑色壓縮象限。</p></div>
-            <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">右移走滑</p><p class="mt-2 text-xs leading-6 text-slate-300">以 N-S 斷層為例，NW / SE 為黑色壓縮象限。</p></div>
+            <div class="rounded-2xl bg-slate-950/70 p-4 ring-1 ring-white/10"><p class="text-sm font-black text-sky-200">走向滑移斷層</p><p class="mt-2 text-xs leading-6 text-slate-300">黑白象限呈四瓣交錯，代表水平剪切為主；左移與右移只作為滑移方向差異，不再分成兩個主要類別。</p></div>
           </div>
         </div>
       </div>
@@ -475,8 +473,8 @@
         <p class="mt-4 leading-8 text-slate-300">P 軸代表最大壓縮方向，位在張裂象限的角平分方向；T 軸代表最小壓縮方向，位在壓縮象限的角平分方向。B 軸或 null axis 則同時垂直 P 軸與 T 軸，也對應兩個節面的交線。</p>
       </details>
       <details class="card rounded-3xl p-6" open>
-        <summary class="cursor-pointer text-xl font-black text-sky-200">走滑、正斷、逆斷如何快速判讀？</summary>
-        <p class="mt-4 leading-8 text-slate-300">滑移角接近 0° 或 ±180° 時以走滑為主；接近 +90° 時，上盤沿傾向向上，為逆斷或逆衝，典型沙灘球中央為黑色；接近 -90° 時，上盤向下，為正斷，典型沙灘球中央為白色。若介於中間，則屬於斜滑斷層。</p>
+        <summary class="cursor-pointer text-xl font-black text-sky-200">走向滑移、正斷、逆斷如何快速判讀？</summary>
+        <p class="mt-4 leading-8 text-slate-300">滑移角接近 0° 或 ±180° 時以走向滑移為主；接近 +90° 時，上盤沿傾向向上，為逆斷或逆衝，典型沙灘球中央為黑色；接近 -90° 時，上盤向下，為正斷，典型沙灘球中央為白色。若介於中間，則屬於斜滑斷層。</p>
       </details>
     </section>
 
@@ -491,7 +489,7 @@
       {file:'4.1-2.png', title:'Fig. 4.1-2｜1906 年舊金山地震斷層滑移量', cap:'圖中將聖安地列斯斷層破裂段與沿線地表滑移量結合，說明大地震不是單點事件，而是沿著一段斷層發生有限長度的破裂與位移。'},
       {file:'4.1-3.png', title:'Fig. 4.1-3｜彈性回跳理論示意', cap:'斷層被鎖住時，兩側岩體持續受板塊運動推擠而彈性變形；破裂瞬間釋放累積應變，地表線性標誌物被錯開。'},
       {file:'4.2-2.png', title:'Fig. 4.2-2｜斷層幾何座標系統', cap:'用走向 φ、傾角 δ、滑移角 λ 描述斷層面與上盤相對下盤的運動方向，是震源機制解的基本語言。'},
-      {file:'4.2-3.png', title:'Fig. 4.2-3｜基本斷層型態', cap:'展示左移、右移、正斷層與逆斷層。滑移角接近 0°、180°、-90°、90° 時分別對應典型端元型態。'},
+      {file:'4.2-3.png', title:'Fig. 4.2-3｜基本斷層型態', cap:'展示走向滑移、正斷層與逆斷層等基本型態。滑移角接近 0° 或 ±180° 時為走向滑移，接近 -90°、90° 時分別對應正斷與逆斷端元。'},
       {file:'4.2-4.png', title:'Fig. 4.2-4｜P 波初動與節面', cap:'不同測站會記錄到壓縮或張裂初動，兩種極性的分界形成兩個節面；這也是沙灘球黑白象限的物理基礎。'},
       {file:'4.2-14.png', title:'Fig. 4.2-14｜典型震源機制球', cap:'比較走滑、逆斷與正斷震源機制在焦球投影上的差異，可用來快速判斷地震所代表的主要應力環境。'},
       {file:'4.2-15.png', title:'Fig. 4.2-15｜滑移角改變造成的沙灘球轉換', cap:'在相同斷層走向下，滑移角由逆斷逐漸轉為走滑再到正斷時，沙灘球象限也會連續改變。'}
@@ -518,14 +516,11 @@
 
     function classifyRake(rake){
       const r = rake;
-      if (Math.abs(r) <= 22.5) return ['左移斷層 (Left-lateral)', '滑移幾乎沿著走向，滑移角接近 0°，以上盤相對下盤左移為主。'];
-      if (Math.abs(Math.abs(r) - 180) <= 22.5) return ['右移斷層 (Right-lateral)', '滑移幾乎沿著走向，滑移角接近 ±180°，以上盤相對下盤右移為主。'];
+      if (Math.abs(r) <= 22.5 || Math.abs(Math.abs(r) - 180) <= 22.5) return ['走向滑移斷層 (Strike-slip Fault)', '滑移幾乎沿著斷層走向，以水平剪切錯動為主；左移或右移屬於滑移方向差異，本頁合併為走向滑移斷層。'];
       if (Math.abs(r - 90) <= 22.5) return ['逆斷層 (Reverse Fault)', '上盤沿斷層面向上移動，反映擠壓環境；若傾角較低，常稱為逆衝斷層。'];
       if (Math.abs(r + 90) <= 22.5) return ['正斷層 (Normal Fault)', '上盤沿斷層面向下移動，常見於張裂環境、地塹或伸張構造。'];
-      if (r > 0 && r < 90) return ['斜滑斷層 (逆斷 + 左移)', '同時包含擠壓抬升與左移走滑分量。'];
-      if (r > 90 && r < 180) return ['斜滑斷層 (逆斷 + 右移)', '同時包含擠壓抬升與右移走滑分量。'];
-      if (r < 0 && r > -90) return ['斜滑斷層 (正斷 + 左移)', '同時包含張裂下陷與左移走滑分量。'];
-      return ['斜滑斷層 (正斷 + 右移)', '同時包含張裂下陷與右移走滑分量。'];
+      if (r > 0 && r < 180) return ['斜滑斷層 (逆斷 + 走向滑移)', '同時包含擠壓抬升與水平走向滑移分量。'];
+      return ['斜滑斷層 (正斷 + 走向滑移)', '同時包含張裂下陷與水平走向滑移分量。'];
     }
 
     // Vectors in East, North, Up coordinates.
@@ -586,7 +581,7 @@
             const a = ampForDir([east,north,up], normal, slip);
             // 地震學慣例：黑色為壓縮初動，白色為張裂初動。
             // 本模型已依端元斷層校正：正斷層中央白、逆斷層中央黑；
-            // N-S 左移走滑為 NE/SW 黑色壓縮象限，右移走滑為 NW/SE 黑色壓縮象限。
+            // 走向滑移斷層為四象限交錯分布；滑移方向相反時黑白象限會互換，但分類仍合併為走向滑移。
             if(a < 0){ img.data[idx]=12; img.data[idx+1]=17; img.data[idx+2]=29; img.data[idx+3]=255; }
             else { img.data[idx]=248; img.data[idx+1]=250; img.data[idx+2]=252; img.data[idx+3]=255; }
           } else { img.data[idx]=255; img.data[idx+1]=255; img.data[idx+2]=255; img.data[idx+3]=0; }
